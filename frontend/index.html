@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Negocio</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <h1>Mi Negocio</h1>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="productos">Productos</button>
+    <button class="tab-btn" data-tab="proveedores">Proveedores</button>
+    <button class="tab-btn" data-tab="compras">Compras</button>
+    <button class="tab-btn" data-tab="clientes">Clientes</button>
+    <button class="tab-btn" data-tab="ventas">Ventas</button>
+    <button class="tab-btn" data-tab="cuentas">Cuentas</button>
+	<button class="tab-btn" data-tab="configuracion">Configuración</button>
+  </nav>
+
+  <!-- ===================== PRODUCTOS ===================== -->
+  <section class="tab-panel active" id="tab-productos">
+    <h2 id="titulo-form-producto">Agregar producto</h2>
+    <form id="form-producto">
+      <label>Nombre: <input name="nombre" placeholder="Nombre" required></label>
+      <label>Precio costo: <input name="precio_costo" type="number" step="0.01" placeholder="0.00" required></label>     
+	  <label>Precio dueño: <input name="precio_dueno" type="number" step="0.01" placeholder="0.00" required></label>
+      <label>Precio vendedor: <input name="precio_vendedor" type="number" step="0.01" placeholder="0.00" required></label>
+      <label>Precio cliente: <input name="precio_cliente" type="number" step="0.01" placeholder="0.00" required></label>
+      <label>Stock: <input name="stock" type="number" placeholder="0" value="0"></label>
+      <label>Stock mínimo: <input name="stock_minimo" type="number" placeholder="5" value="5"></label>
+      <label>Categoría: <input name="categoria" placeholder="Categoría"></label>
+      <label>Descripción: <input name="descripcion" placeholder="Descripción"></label>
+      <label>Imagen: <input name="imagen" type="file" accept="image/*"></label>
+      <button type="submit" id="btn-guardar-producto">Agregar</button>
+      <button type="button" id="btn-cancelar-producto" style="display:none;">Cancelar</button>
+    </form>
+
+    <h2>Listado</h2>
+    <table id="tabla-productos">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+		  <th>Costo</th>
+          <th>Precio dueño</th>
+          <th>Precio vendedor</th>
+          <th>Precio cliente</th>
+          <th>Stock</th>
+          <th>Categoría</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+  
+  <!-- ===================== PROVEEDORES ===================== -->
+  <section class="tab-panel" id="tab-proveedores">
+    <h2>Agregar proveedor</h2>
+    <form id="form-proveedor">
+      <input name="nombre" placeholder="Nombre" required>
+      <input name="telefono" placeholder="Teléfono">
+      <input name="direccion" placeholder="Dirección">
+      <input name="nota" placeholder="Nota">
+      <button type="submit">Agregar</button>
+    </form>
+
+    <h2>Listado</h2>
+    <table id="tabla-proveedores">
+      <thead>
+        <tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Dirección</th><th>Nota</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ===================== COMPRAS ===================== -->
+  <section class="tab-panel" id="tab-compras">
+    <h2>Registrar compra</h2>
+
+    <form id="form-compra">
+      <div class="fila">
+        <input name="fecha" type="date" id="input-fecha-compra">
+        <select name="proveedor_id" id="select-proveedor">
+          <option value="">Sin proveedor</option>
+        </select>
+        <input name="numero_factura" placeholder="Nº factura (opcional)">
+        <input name="nota" placeholder="Nota (opcional)">
+      </div>
+
+      <h3>Líneas</h3>
+      <table id="tabla-lineas">
+        <thead>
+          <tr>
+            <th>Producto</th><th>Cantidad</th><th>Precio compra</th>
+            <th>Subtotal</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button type="button" id="btn-agregar-linea">+ Añadir línea</button>
+
+      <p class="total">Total: <span id="total-compra">0.00</span></p>
+
+      <button type="submit">Guardar compra</button>
+    </form>
+
+    <h2>Historial</h2>
+    <table id="tabla-compras">
+      <thead>
+        <tr><th>ID</th><th>Proveedor</th><th>Factura</th><th>Total</th><th>Fecha</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ===================== CLIENTES ===================== -->
+  <section class="tab-panel" id="tab-clientes">
+    <h2>Agregar cliente</h2>
+    <form id="form-cliente">
+      <input name="nombre" placeholder="Nombre" required>
+      <input name="telefono" placeholder="Teléfono">
+      <input name="direccion" placeholder="Dirección">
+      <input name="nota" placeholder="Nota">
+      <button type="submit">Agregar</button>
+    </form>
+
+    <h2>Listado</h2>
+    <table id="tabla-clientes">
+      <thead>
+        <tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Dirección</th><th>Nota</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ===================== VENTAS ===================== -->
+  <section class="tab-panel" id="tab-ventas">
+    <h2>Registrar venta</h2>
+
+    <form id="form-venta">
+      <div class="fila">
+        <input name="fecha" type="date" id="input-fecha-venta">
+        <select name="cliente_id" id="select-cliente">
+          <option value="">Cliente general</option>
+        </select>
+        <select name="tipo_pago" id="select-tipo-pago">
+          <option value="efectivo">Efectivo</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="credito">Crédito</option>
+        </select>
+        <input name="nota" placeholder="Nota (opcional)">
+      </div>
+
+      <div id="bloque-credito" style="display:none;">
+        <p class="aviso">Venta a crédito — abono inicial (opcional):</p>
+        <input name="abono_inicial" type="number" step="0.01" value="0" placeholder="Abono inicial">
+        <select name="tipo_pago_abono">
+          <option value="efectivo">Efectivo</option>
+          <option value="transferencia">Transferencia</option>
+        </select>
+      </div>
+
+      <h3>Líneas</h3>
+      <table id="tabla-lineas-venta">
+        <thead>
+          <tr>
+            <th>Producto</th><th>Cantidad</th><th>Precio venta</th>
+            <th>Subtotal</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button type="button" id="btn-agregar-linea-venta">+ Añadir línea</button>
+
+      <p class="total">Total: <span id="total-venta">0.00</span></p>
+
+      <button type="submit">Guardar venta</button>
+    </form>
+
+    <h2>Historial</h2>
+    <table id="tabla-ventas">
+      <thead>
+        <tr>
+          <th>ID</th><th>Fecha</th><th>Cliente</th><th>Tipo pago</th>
+          <th>Estado</th><th>Total</th><th>Abonado</th><th>Saldo</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- ===================== CUENTAS ===================== -->
+  <section class="tab-panel" id="tab-cuentas">
+    <h2>Deudas por cliente</h2>
+    <table id="tabla-cuentas">
+      <thead>
+        <tr><th>Cliente</th><th>Deuda total</th><th>Acciones</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="detalle-cuenta" style="display:none;">
+      <h2 id="titulo-detalle-cuenta">Detalle</h2>
+      <table id="tabla-detalle-ventas">
+        <thead>
+          <tr><th>ID</th><th>Fecha</th><th>Total</th><th>Abonado</th><th>Saldo</th><th>Acciones</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+<section class="tab-panel" id="tab-configuracion">
+  <h2>Configuración</h2>
+  <p class="nota">Todos los precios del sistema están expresados en USD. Al momento de la venta, se aplicará la tasa de cambio vigente para cobrar en CUP.</p>
+
+  <form id="form-configuracion">
+    <label>Tasa de cambio (CUP por USD): <input name="tasa_cambio" type="number" step="0.01" required></label>
+    <button type="submit">Guardar tasa</button>
+  </form>
+
+  <p id="fecha-tasa"></p>
+</section>
+
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+body { font-family: system-ui, sans-serif; margin: 1rem; }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.1rem; margin-top: 1.5rem; }
+h3 { font-size: 1rem; }
+
+/* Pestañas */
+.tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid #ddd; margin-bottom: 1rem; }
+.tab-btn {
+  padding: 0.5rem 1rem; background: none; border: none;
+  border-bottom: 3px solid transparent; cursor: pointer; font-size: 1rem;
+}
+.tab-btn.active { border-bottom-color: #0078d4; font-weight: bold; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Formularios */
+form { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+.fila { display: flex; gap: 0.5rem; flex-wrap: wrap; width: 100%; }
+input, select, button { padding: 0.4rem; font-size: 1rem; }
+
+/* Tablas */
+table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+th, td { border: 1px solid #ccc; padding: 0.4rem; text-align: left; vertical-align: middle; }
+th { background: #f0f0f0; }
+
+/* Líneas de compra */
+#linea-producto { min-width: 160px; }
+.linea-cantidad, .linea-precio-compra { width: 80px; }
+.linea-nombre-nuevo { width: 140px; }
+.linea-precio-venta { width: 100px; }
+
+.total { font-size: 1.1rem; font-weight: bold; margin: 0.5rem 0; }
+
+#tabla-productos img {
+  border-radius: 4px;
+  display: block;
+}
+body { font-family: system-ui, sans-serif; margin: 1rem; }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.1rem; margin-top: 1.5rem; }
+h3 { font-size: 1rem; }
+
+.tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid #ddd; margin-bottom: 1rem; flex-wrap: wrap; }
+.tab-btn {
+  padding: 0.5rem 1rem; background: none; border: none;
+  border-bottom: 3px solid transparent; cursor: pointer; font-size: 1rem;
+}
+.tab-btn.active { border-bottom-color: #0078d4; font-weight: bold; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+form { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+.fila { display: flex; gap: 0.5rem; flex-wrap: wrap; width: 100%; }
+input, select, button { padding: 0.4rem; font-size: 1rem; }
+
+table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+th, td { border: 1px solid #ccc; padding: 0.4rem; text-align: left; vertical-align: middle; }
+th { background: #f0f0f0; }
+
+#linea-producto { min-width: 160px; }
+.linea-cantidad, .linea-precio-compra { width: 80px; }
+.linea-nombre-nuevo { width: 140px; }
+.linea-precio-venta { width: 100px; }
+
+.linea-cantidad-venta, .linea-precio-venta-venta { width: 80px; }
+
+.total { font-size: 1.1rem; font-weight: bold; margin: 0.5rem 0; }
+.aviso { font-size: 0.9rem; color: #666; margin: 0.3rem 0; }
+
+#tabla-productos img { border-radius: 4px; display: block; }
+
+#bloque-credito { background: #fffbe6; padding: 0.5rem; border: 1px solid #ffe58f; border-radius: 4px; margin: 0.5rem 0; }
