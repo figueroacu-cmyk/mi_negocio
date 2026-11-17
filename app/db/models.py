@@ -49,6 +49,7 @@ class Compra(Base):
     nota: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     total: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     tasa_cambio: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
+    total_cup: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
 
     proveedor: Mapped[Optional[Proveedor]] = relationship()
     lineas: Mapped[List["LineaCompra"]] = relationship(

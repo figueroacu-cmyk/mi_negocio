@@ -7,6 +7,7 @@ const API_CLIENTES = "/api/clientes";
 const API_VENTAS = "/api/ventas";
 const API_CUENTAS = "/api/cuentas";
 const API_CONFIGURACION = "/api/configuracion";
+const API_REPORTES = "/api/reportes";
 
 let editandoProductoId = null;
 let productosCache = [];
@@ -486,6 +487,101 @@ document.querySelector("#select-tipo-pago").addEventListener("change", (e) => {
   bloque.style.display = e.target.value === "credito" ? "block" : "none";
 });
 
+// ===== FLUJO DE CAJA REGISTRADORA =====
+let ventaPendiente = null; // guarda la venta recién registrada mientras se cobra
+
+function abrirModalCobro(venta, tasa) {
+  ventaPendiente = venta;
+  const totalUsd = parseFloat(venta.total) || 0;
+  const totalCup = parseFloat(venta.total_cup) || (totalUsd * tasa);
+
+  document.querySelector("#cobro-total-usd").textContent = "$" + totalUsd.toFixed(2);
+  document.querySelector("#cobro-tasa").textContent = tasa.toFixed(2);
+  document.querySelector("#cobro-total-cup").textContent = "$" + totalCup.toFixed(2);
+  document.querySelector("#cobro-moneda").value = "CUP";
+  document.querySelector("#cobro-importe").value = "";
+  document.querySelector("#cobro-vuelto").textContent = "$0.00";
+  document.querySelector("#cobro-vuelto").style.color = "#0a7d0a";
+  document.querySelector("#cobro-error").style.display = "none";
+  document.querySelector("#modal-cobro").style.display = "flex";
+  document.querySelector("#cobro-importe").focus();
+
+  recalcularVuelto();
+}
+
+function recalcularVuelto() {
+  if (!ventaPendiente) return;
+  const totalUsd = parseFloat(ventaPendiente.total) || 0;
+  const tasa = parseFloat(document.querySelector("#cobro-tasa").textContent) || 0;
+  const totalCup = totalUsd * tasa;
+  const moneda = document.querySelector("#cobro-moneda").value;
+  const importe = parseFloat(document.querySelector("#cobro-importe").value) || 0;
+
+  let vueltoCup;
+  if (moneda === "CUP") {
+    vueltoCup = importe - totalCup;
+  } else {
+    // Pagó en USD: convertir a CUP
+    vueltoCup = (importe * tasa) - totalCup;
+  }
+
+  const el = document.querySelector("#cobro-vuelto");
+  const err = document.querySelector("#cobro-error");
+
+  if (importe === 0) {
+    el.textContent = "$0.00";
+    el.style.color = "#0a7d0a";
+    err.style.display = "none";
+  } else if (vueltoCup < 0) {
+    el.textContent = "$" + vueltoCup.toFixed(2);
+    el.style.color = "#c00";
+    err.textContent = "El importe es menor al total. Por ahora no se permite venta a crédito desde aquí.";
+    err.style.display = "block";
+  } else {
+    el.textContent = "$" + vueltoCup.toFixed(2);
+    el.style.color = "#0a7d0a";
+    err.style.display = "none";
+  }
+}
+
+function cerrarModalCobro() {
+  document.querySelector("#modal-cobro").style.display = "none";
+  ventaPendiente = null;
+}
+
+document.querySelector("#cobro-moneda").addEventListener("change", recalcularVuelto);
+document.querySelector("#cobro-importe").addEventListener("input", recalcularVuelto);
+document.querySelector("#cobro-cancelar").addEventListener("click", () => {
+  // La venta ya está registrada en BD. Solo cerramos el modal.
+  cerrarModalCobro();
+  // Refrescar productos y ventas
+  cargarProductos();
+  cargarVentas();
+});
+document.querySelector("#cobro-confirmar").addEventListener("click", () => {
+  const importe = parseFloat(document.querySelector("#cobro-importe").value) || 0;
+  if (importe <= 0) {
+    alert("Ingresa el importe recibido");
+    return;
+  }
+  const totalUsd = parseFloat(ventaPendiente.total) || 0;
+  const tasa = parseFloat(document.querySelector("#cobro-tasa").textContent) || 0;
+  const totalCup = totalUsd * tasa;
+  const moneda = document.querySelector("#cobro-moneda").value;
+  const vueltoCup = (moneda === "CUP" ? importe : importe * tasa) - totalCup;
+
+  if (vueltoCup < 0) {
+    alert("El importe es menor al total. No se puede confirmar el cobro.");
+    return;
+  }
+
+  alert("Venta cobrada. Vuelto: $" + vueltoCup.toFixed(2) + " CUP");
+  cerrarModalCobro();
+  cargarProductos();
+  cargarVentas();
+});
+
+// ===== SUBMIT DE VENTA =====
 document.querySelector("#form-venta").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -529,14 +625,25 @@ document.querySelector("#form-venta").addEventListener("submit", async (e) => {
   });
 
   if (res.ok) {
+    const venta = await res.json();
+
+    // Limpiar el formulario
     form.reset();
     ponerFechaHoy("#input-fecha-venta");
     document.querySelector("#bloque-credito").style.display = "none";
     document.querySelector("#tabla-lineas-venta tbody").innerHTML = "";
     document.querySelector("#total-venta").textContent = "0.00";
-    await cargarProductos();
-    await cargarVentas();
-    alert("Venta registrada");
+
+    // Obtener la tasa vigente y abrir el modal de cobro
+    try {
+      const resTasa = await fetch(API_CONFIGURACION + "/");
+      if (!resTasa.ok) throw new Error("No se pudo obtener la tasa");
+      const config = await resTasa.json();
+      abrirModalCobro(venta, parseFloat(config.tasa_cambio));
+    } catch (err) {
+      // Si falla la tasa, mostramos el ticket con la tasa que trajo la venta
+      abrirModalCobro(venta, parseFloat(venta.tasa_cambio) || 0);
+    }
   } else {
     const err = await res.json();
     alert("Error: " + (err.detail || "desconocido"));
@@ -664,6 +771,7 @@ document.querySelector("#tabla-detalle-ventas").addEventListener("click", async 
 (async function init() {
   ponerFechaHoy("#input-fecha-compra");
   ponerFechaHoy("#input-fecha-venta");
+  ponerFechaHoy("#input-fecha-cierre");   // ← NUEVA
   await cargarConfiguracion();   // ← esta línea
   await cargarProductos();
   await cargarProveedores();
@@ -701,3 +809,59 @@ document.querySelector("#form-configuracion").addEventListener("submit", async (
     alert("Error: " + (err.detail || "desconocido"));
   }
 });
+  
+// ==================== CIERRE DEL DÍA ====================
+
+document.querySelector("#btn-generar-reporte").addEventListener("click", cargarReporteDia);
+
+async function cargarReporteDia() {
+  const fechaInput = document.querySelector("#input-fecha-cierre");
+  const fecha = fechaInput.value;
+  const url = fecha
+    ? `${API_REPORTES}/ventas-dia?fecha=${fecha}`
+    : `${API_REPORTES}/ventas-dia`;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json();
+    return alert("Error: " + (err.detail || "desconocido"));
+  }
+
+  const data = await res.json();
+
+  document.querySelector("#reporte-dia").style.display = "block";
+  document.querySelector("#rep-total-ventas").textContent = data.total_ventas;
+  document.querySelector("#rep-total-usd").textContent = "$" + data.total_usd.toFixed(2);
+  document.querySelector("#rep-total-cup").textContent = "$" + data.total_cup.toFixed(2);
+  document.querySelector("#rep-total-efectivo").textContent = "$" + data.total_efectivo_cup.toFixed(2);
+
+  // Desglose por tipo de pago
+  const tbodyTipos = document.querySelector("#tabla-reporte-tipos tbody");
+  tbodyTipos.innerHTML = "";
+  for (const [tipo, info] of Object.entries(data.por_tipo_pago)) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${tipo}</td>
+      <td>${info.cantidad}</td>
+      <td>$${info.total_usd.toFixed(2)}</td>
+      <td>$${info.total_cup.toFixed(2)}</td>
+    `;
+    tbodyTipos.appendChild(tr);
+  }
+
+  // Productos vendidos
+  const tbodyProds = document.querySelector("#tabla-reporte-productos tbody");
+  tbodyProds.innerHTML = "";
+  for (const p of data.productos) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.nombre}</td>
+      <td>${p.cantidad}</td>
+      <td>$${p.total_usd.toFixed(2)}</td>
+      <td>$${p.total_cup.toFixed(2)}</td>
+    `;
+    tbodyProds.appendChild(tr);
+  }
+}   // ← cierre de la función cargarReporteDia
+
+document.querySelector("#btn-generar-reporte").addEventListener("click", cargarReporteDia);

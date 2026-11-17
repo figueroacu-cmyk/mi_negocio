@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 
 from app.config import FRONTEND_DIR, UPLOADS_DIR
 from app.db.base import init_db
-from app.api import productos, proveedores, compras, clientes, ventas, cuentas, configuracion
+from app.api import productos, proveedores, compras, clientes, ventas, cuentas, configuracion, reportes
 
 app = FastAPI(title="Mi Negocio")
 
@@ -17,6 +17,7 @@ app.include_router(clientes.router)
 app.include_router(ventas.router)
 app.include_router(cuentas.router)
 app.include_router(configuracion.router)
+app.include_router(reportes.router)
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")

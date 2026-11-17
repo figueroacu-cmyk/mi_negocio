@@ -6,3 +6,5 @@ uploads/
 .venv/
 venv/
 .env
+mi_negocio_backup_*.db
+indice_ventas.txt

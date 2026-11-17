@@ -16,6 +16,7 @@
     <button class="tab-btn" data-tab="clientes">Clientes</button>
     <button class="tab-btn" data-tab="ventas">Ventas</button>
     <button class="tab-btn" data-tab="cuentas">Cuentas</button>
+    <button class="tab-btn" data-tab="cierre">Cierre del día</button>
 	<button class="tab-btn" data-tab="configuracion">Configuración</button>
   </nav>
 
@@ -225,6 +226,93 @@
   <p id="fecha-tasa"></p>
 </section>
 
+<!-- ===================== CIERRE DEL DÍA ===================== -->
+<section class="tab-panel" id="tab-cierre">
+  <h2>Cierre del día</h2>
+
+  <div class="fila">
+    <label>Fecha: <input type="date" id="input-fecha-cierre"></label>
+    <button type="button" id="btn-generar-reporte">Generar reporte</button>
+  </div>
+
+  <div id="reporte-dia" style="display:none; margin-top:16px;">
+    <h3>Resumen del día</h3>
+    <table id="tabla-reporte-resumen">
+      <tbody>
+        <tr><th>Total de ventas</th><td id="rep-total-ventas">0</td></tr>
+        <tr><th>Total USD</th><td id="rep-total-usd">$0.00</td></tr>
+        <tr><th>Total CUP</th><td id="rep-total-cup">$0.00</td></tr>
+        <tr style="font-weight:bold; background:#fffbe6;">
+          <th>Total en efectivo (para arqueo)</th>
+          <td id="rep-total-efectivo">$0.00</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Desglose por tipo de pago</h3>
+    <table id="tabla-reporte-tipos">
+      <thead>
+        <tr><th>Tipo</th><th>Cantidad</th><th>Total USD</th><th>Total CUP</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>Productos vendidos</h3>
+    <table id="tabla-reporte-productos">
+      <thead>
+        <tr><th>Producto</th><th>Cantidad</th><th>Total USD</th><th>Total CUP</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Modal de cobro (caja registradora) -->
+<div id="modal-cobro" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:8px; padding:24px; width:420px; max-width:95vw; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+    <h3 style="margin-top:0;">Cobro al cliente</h3>
+
+    <div style="margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+        <span>Total USD:</span>
+        <strong id="cobro-total-usd">$0.00</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+        <span>Tasa del día:</span>
+        <strong id="cobro-tasa">0.00</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:1.2em; border-top:1px solid #ddd; padding-top:8px; margin-top:8px;">
+        <span>Total CUP:</span>
+        <strong id="cobro-total-cup">$0.00</strong>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="display:block; margin-bottom:4px;">Moneda del pago:</label>
+      <select id="cobro-moneda" style="width:100%; padding:6px;">
+        <option value="CUP">CUP</option>
+        <option value="USD">USD</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="display:block; margin-bottom:4px;">Importe recibido:</label>
+      <input id="cobro-importe" type="number" step="0.01" min="0" style="width:100%; padding:8px; font-size:1.1em;" autocomplete="off">
+    </div>
+
+    <div style="display:flex; justify-content:space-between; font-size:1.3em; border-top:2px solid #333; padding-top:8px; margin-bottom:16px;">
+      <span>Vuelto:</span>
+      <strong id="cobro-vuelto" style="color:#0a7d0a;">$0.00</strong>
+    </div>
+
+    <div id="cobro-error" style="color:#c00; margin-bottom:8px; display:none;"></div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" id="cobro-cancelar" style="flex:1; padding:10px;">Cancelar</button>
+      <button type="button" id="cobro-confirmar" style="flex:1; padding:10px; background:#0a7d0a; color:#fff; border:none; border-radius:4px; cursor:pointer;">Confirmar cobro</button>
+    </div>
+  </div>
+</div>
 
   <script src="/static/app.js"></script>
 </body>

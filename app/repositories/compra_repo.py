@@ -21,28 +21,57 @@ class CompraRepository:
             fecha=fecha if fecha else datetime.now(),
             total=0,
             tasa_cambio=tasa_cambio,
+            total_cup=0,
         )
-        
+
         self.session.add(compra)
         self.session.flush()  # para tener compra.id
 
         total = 0.0
         for ln in lineas:
             producto_id = ln.get("producto_id")
-            if not producto_id:
-                # Producto nuevo creado al vuelo
-                nuevo = Producto(
-                    nombre=ln["producto_nombre"],
-                    precio=ln.get("precio_venta", 0),
-                    stock=0,
-                )
-                self.session.add(nuevo)
-                self.session.flush()
-                producto_id = nuevo.id
-
-            producto = self.session.get(Producto, producto_id)
             cantidad = int(ln["cantidad"])
             precio_compra = float(ln["precio_compra"])
+
+            if producto_id:
+                # Producto existente: solo actualizar stock y costo ponderado
+                producto = self.session.get(Producto, producto_id)
+                if not producto:
+                    raise ValueError(f"Producto {producto_id} no encontrado")
+                if not producto.activo:
+                    raise ValueError(f"Producto {producto.nombre} está inactivo")
+
+                stock_actual = max(int(producto.stock), 0)
+                costo_actual = float(producto.precio_costo)
+
+                # Promedio ponderado
+                if stock_actual + cantidad > 0:
+                    nuevo_costo = (
+                        stock_actual * costo_actual + cantidad * precio_compra
+                    ) / (stock_actual + cantidad)
+                else:
+                    nuevo_costo = precio_compra
+
+                producto.precio_costo = round(nuevo_costo, 2)
+                producto.stock = stock_actual + cantidad
+                producto.tasa_compra = tasa_cambio
+            else:
+                # Producto nuevo creado al vuelo desde el formulario de compra
+                precio_dueno = float(ln.get("precio_dueno", 0))
+                precio_vendedor = float(ln.get("precio_vendedor", 0))
+                producto = Producto(
+                    nombre=ln["producto_nombre"],
+                    precio_costo=precio_compra,
+                    precio_dueno=precio_dueno,
+                    precio_vendedor=precio_vendedor,
+                    precio_cliente=precio_dueno + precio_vendedor,
+                    stock=cantidad,
+                    tasa_compra=tasa_cambio,
+                )
+                self.session.add(producto)
+                self.session.flush()
+                producto_id = producto.id
+
             subtotal = cantidad * precio_compra
 
             linea = LineaCompra(
@@ -53,17 +82,14 @@ class CompraRepository:
                 subtotal=subtotal,
             )
             self.session.add(linea)
-
-            producto.stock += cantidad
-            producto.precio_costo = precio_compra
-            producto.tasa_compra = tasa_cambio
             total += subtotal
 
         compra.total = total
+        compra.total_cup = round(total * tasa_cambio, 2)
         self.session.commit()
         self.session.refresh(compra)
         return compra
-
+    
     def listar(self) -> list[Compra]:
         stmt = select(Compra).order_by(Compra.fecha.desc())
         return list(self.session.execute(stmt).scalars())

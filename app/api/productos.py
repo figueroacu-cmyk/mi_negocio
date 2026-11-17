@@ -16,13 +16,11 @@ class ProductoIn(BaseModel):
     precio_costo: float
     precio_dueno: float
     precio_vendedor: float
-    precio_cliente: float
     stock: int = 0
     stock_minimo: int = 5
     descripcion: str | None = None
     categoria: str | None = None
     imagen: str | None = None
-
 
 class ProductoUpdate(BaseModel):
     nombre: str | None = None
